@@ -1,0 +1,30 @@
+
+INSERT INTO BL_3NF.CE_PAYMENT_TYPES 
+(
+    PAYMENT_TYPE_SRCID,
+    SOURCE_SYSTEM,
+    SOURCE_TABLE,
+    PAYMENT_TYPE_NAME
+)
+
+WITH TEMP_Q AS 
+(
+    SELECT 
+        MAX(INSERT_DT) AS MAX_DATE
+    FROM BL_3NF.CE_PAYMENT_TYPES
+)
+SELECT 
+    PAYMENT_TYPE_ID,
+    'SA_SOURCE_SYSTEM_RETAIL',
+    'SA_OLIST_GEO',
+    PAYMENT_TYPE_NAME
+FROM SA_SOURCE_SYSTEM_RETAIL.SA_PAYMENTS_TYPES
+WHERE INSERT_DATE > (SELECT MAX_DATE FROM TEMP_Q)
+      AND PAYMENT_TYPE_ID NOT IN (
+                                    SELECT
+                                        PAYMENT_TYPE_SRCID
+                                    FROM BL_3NF.CE_PAYMENT_TYPES 
+                                  )
+;
+
+COMMIT;
